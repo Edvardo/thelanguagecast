@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>PresenceKit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <style>
+    .buddy-name,
+.invite-message {
+  line-height: 2.3;
+}
+
+.video-holder {
+  position: relative;
+  min-height: 40em;
+  text-align: center;
+  background-color: #333;
+}
+
+.video-holder.empty {
+  background-color: transparent;
+}
+
+.subscriber,
+.publisher {
+  position: absolute;
+}
+
+.subscriber {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40em;
+  z-index: 100;
+}
+
+.publisher {
+  bottom: 1em;
+  right: 1em;
+  width: 20%;
+  height: 10em;
+  z-index: 200;
+  border: 3px solid white;
+  border-radius: 3px;
+}
+
+.video-holder .bottom-bar {
+  position: absolute;
+  bottom: 1em;
+  text-align: center;
+  z-index: 300;
+  left: 0;
+  right: 0;
+}
+
+.waiting,
+.ending {
+  color: #ccc;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+  height: 5em;
+  font-size: 1.3em;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: auto;
+  background-color: #ccc;
+
+  border-radius: 100%;
+  -webkit-animation: scaleout 1.0s infinite ease-in-out;
+  animation: scaleout 1.0s infinite ease-in-out;
+}
+
+@-webkit-keyframes scaleout {
+  0% { -webkit-transform: scale(0.0) }
+  100% {
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleout {
+  0% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 100% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+
+    </style>
+</head>
+<body class="container">
+
+        <div class="panel-heading">
+          <h3 class="panel-title">Chat with Kevin</h3>
+        </div>
+        <div class="panel-body video-holder">
+          <div class="subscriber"></div>
+          <div class="publisher"></div>
+          <div class="bottom-bar">
+            <button type="button" class="btn btn-danger end-button">End Chat</button>
+          </div>
+          <div class="waiting">
+            <div class="spinner"></div>
+            <p>Waiting for Kevin</p>
+          </div>
+          <div class="ending hidden">
+            <p>Your chat with Kevin has ended</p>
+          </div>
+        </div>
+      
+
+
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="http://static.opentok.com/webrtc/v2.2/js/opentok.min.js"></script>
+    <script>
+
+      var session = OT.initSession('2_MX40NTIzMzA3Mn5-MTQzMTIxMjI0NzQ1N35sYnB1TUZYZEk1TklGcTBGNUxCZjB5VjR-fg');
+      var publisher = OT.initPublisher($('.publisher')[0], {
+          insertMode: 'append',
+          width: '100%',
+          height: '100%',
+          style: {
+            buttonDisplayMode: 'off'
+          }
+        });
+
+      session.on('streamCreated', function(event) {
+      	session.subscribe(event.stream, $('.subscriber')[0], {
+      		insertMode: 'append',
+      		width: '100%',
+      		height: '100%',
+      		style: {
+      			buttonDisplayMode: 'off'
+      		}
+      	});
+      });
+
+      session.on('sessionDisconnected', function(event) {
+      	$('.waiting').remove();
+      	$('.ending').removeClass('hidden');
+      });
+
+      session.connect(45233072, 'T1==cGFydG5lcl9pZD00NTIzMzA3MiZzaWc9ZWZjZDIwZjk0ZTQ4MjBjNWI3OTM2ODBhY2EyNTI1MTU5MmZhNmQwZDpyb2xlPXB1Ymxpc2hlciZzZXNzaW9uX2lkPTJfTVg0ME5USXpNekEzTW41LU1UUXpNVEl4TWpJME56UTFOMzVzWW5CMVRVWllaRWsxVGtsR2NUQkdOVXhDWmpCNVZqUi1mZyZjcmVhdGVfdGltZT0xNDMxMjEyMjU5Jm5vbmNlPTAuMDQ3MTgzNjU5Nzc0MDY5OCZleHBpcmVfdGltZT0xNDMzODA0MjM4JmNvbm5lY3Rpb25fZGF0YT0=', function(error) {
+        if (error) {
+          return console.log('session connection error');
+        }
+
+        session.publish(publisher);
+        $('.waiting').addClass('hidden');
+      });
+
+      $('.end-button').on('click', function(event) {
+      	session.disconnect();
+      });
+
+    </script>
+</body>
+</html>
+
